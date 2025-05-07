@@ -7,6 +7,8 @@
 #include "SceneObject.h"
 #include "InputCommands.h"
 #include <vector>
+#include "CommandManager.h"
+#include "MoveObjectCommand.h"
 
 
 class ToolMain
@@ -26,10 +28,27 @@ public: //methods
 	void	Tick(MSG *msg);
 	void	UpdateInput(MSG *msg);
 
+	void OnWindowStatusChanged(bool IsWindowOpen);
+
+	Game& GetGame(); //used to get game in mfcmain
+
+
+	void Undo();
+
+	void Redo();
+
+	inline void SetCommandManager(CommandManager* commandManager) { m_commandManager = commandManager; }
+
+	inline std::vector<DisplayObject>* GetDisplayList() { return &m_d3dRenderer.m_displayList; }
+
 public:	//variables
 	std::vector<SceneObject>    m_sceneGraph;	//our scenegraph storing all the objects in the current chunk
 	ChunkObject					m_chunk;		//our landscape chunk
 	int m_selectedObject;						//ID of current Selection
+
+
+	CommandManager* m_commandManager;
+
 
 private:	//methods
 	void	onContentAdded();
@@ -47,7 +66,10 @@ private:	//variables
 	int m_width;		//dimensions passed to directX
 	int m_height;
 	int m_currentChunk;			//the current chunk of thedatabase that we are operating on.  Dictates loading and saving. 
-	
+	//check for dialogue box
+	bool WindowOpen;
 
+	float lastMouseX;
+	float lastMouseY;
 	
 };

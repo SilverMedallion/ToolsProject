@@ -43,17 +43,17 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 	m_d3dRenderer.Initialize(handle, m_width, m_height);
 
 	//database connection establish
-	int rc;
+	int rc;                                                                                       //rc stands for Return Code and is used to signify success or failure
 	rc = sqlite3_open_v2("database/test.db",&m_databaseConnection, SQLITE_OPEN_READWRITE, NULL);
 
 	if (rc) 
 	{
-		TRACE("Can't open database");
+		TRACE("In ToolMain.cpp sqlite3_open_v2 has been called and failed to open the database as it has returned 1. Find why database has not opened ");
 		//if the database cant open. Perhaps a more catastrophic error would be better here
 	}
 	else 
 	{
-		TRACE("Opened database successfully");
+		TRACE("Opened database successfully, sqlite3_open_v2 returned as expected");
 	}
 
 	onActionLoad();
@@ -62,9 +62,10 @@ void ToolMain::onActionInitialise(HWND handle, int width, int height)
 void ToolMain::onActionLoad()
 {
 	//load current chunk and objects into lists
-	if (!m_sceneGraph.empty())		//is the vector empty
+	//empty vector of sceen objects if it is not already empty
+	if (!m_sceneGraph.empty())		
 	{
-		m_sceneGraph.clear();		//if not, empty it
+		m_sceneGraph.clear();		
 	}
 
 	//SQL
@@ -289,9 +290,16 @@ void ToolMain::Tick(MSG *msg)
 
 	//Renderer Update Call
 	m_d3dRenderer.Tick(&m_toolInputCommands);
+
+	if (m_toolInputCommands.mouse_left && !WindowOpen)
+	{
+		m_selectedObject = m_d3dRenderer.MousePicking();
+		m_d3dRenderer.SetSelectedID(m_selectedObject);
+		m_toolInputCommands.mouse_left = false;
+	}
 }
 
-void ToolMain::UpdateInput(MSG * msg)
+void ToolMain::UpdateInput(MSG* msg)
 {
 
 	switch (msg->message)
@@ -305,49 +313,156 @@ void ToolMain::UpdateInput(MSG * msg)
 		m_keyArray[msg->wParam] = false;
 		break;
 
+
+	case WM_ACTIVATE:
+	case WM_ACTIVATEAPP:
+	case WM_INPUT:
 	case WM_MOUSEMOVE:
+		//thought needed for object picking. but having this in breaks camera mouse controls
+		m_toolInputCommands.mouse_x = GET_X_LPARAM(msg->lParam);
+		m_toolInputCommands.mouse_y = GET_Y_LPARAM(msg->lParam);
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
 		break;
 
-	case WM_LBUTTONDOWN:	//mouse button down,  you will probably need to check when its up too
-		//set some flag for the mouse button in inputcommands
+	case WM_LBUTTONDOWN:
+		//just gonna do this here this way for now for object picking
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
+		m_toolInputCommands.mouse_left = true;
 		break;
+	case WM_LBUTTONUP:
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
+		m_toolInputCommands.mouse_left = false;
+		break;
+	case WM_RBUTTONDOWN:
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
+		m_toolInputCommands.mouse_right = true;
+		break;
+	case WM_RBUTTONUP:
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
+		m_toolInputCommands.mouse_right = false;
+		break;
+	case WM_MBUTTONDOWN:
+	case WM_MBUTTONUP:
+	case WM_MOUSEWHEEL:
+	case WM_XBUTTONDOWN:
+	case WM_XBUTTONUP:
+	case WM_MOUSEHOVER:
+		DirectX::Mouse::ProcessMessage(msg->message, msg->wParam, msg->lParam);
+		break;
+	}
+
+
+
+
+		//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
+		//WASD movement
+		if (m_keyArray['W'])
+		{
+			m_toolInputCommands.forward = true;
+		}
+		else m_toolInputCommands.forward = false;
+
+		if (m_keyArray['S'])
+		{
+			m_toolInputCommands.back = true;
+		}
+		else m_toolInputCommands.back = false;
+		if (m_keyArray['A'])
+		{
+			m_toolInputCommands.left = true;
+		}
+		else m_toolInputCommands.left = false;
+
+		if (m_keyArray['D'])
+		{
+			m_toolInputCommands.right = true;
+		}
+		else m_toolInputCommands.right = false;
+
+
+		//cam rotation
+		if (m_keyArray['E'])
+		{
+			m_toolInputCommands.rotRight = true;
+		}
+		else m_toolInputCommands.rotRight = false;
+
+		if (m_keyArray['Q'])
+		{
+			m_toolInputCommands.rotLeft = true;
+		}
+		else m_toolInputCommands.rotLeft = false;
+
+
+		//camera move up and donw
+		if (m_keyArray['C'])
+		{
+			m_toolInputCommands.down = true;
+		}
+		else m_toolInputCommands.down = false;
+
+		if (m_keyArray['X'])
+		{
+			m_toolInputCommands.up = true;
+		}
+		else m_toolInputCommands.up = false;
+
+		//camera look up and down
+		if (m_keyArray['R'])
+		{
+			m_toolInputCommands.lookUp = true;
+		}
+		else m_toolInputCommands.lookUp = false;
+
+		if (m_keyArray['F'])
+		{
+			m_toolInputCommands.lookDown = true;
+		}
+		else m_toolInputCommands.lookDown = false;
+
+		if ((msg->message == WM_KEYDOWN) && (GetKeyState(VK_CONTROL) & 0x8000))
+		{
+			switch (msg->wParam)
+			{
+			case 'Z':
+				Undo();
+				break;
+			case 'Y':
+				Redo();
+				break;
+			}
+		}
 
 	}
-	//here we update all the actual app functionality that we want.  This information will either be used int toolmain, or sent down to the renderer (Camera movement etc
-	//WASD movement
-	if (m_keyArray['W'])
-	{
-		m_toolInputCommands.forward = true;
-	}
-	else m_toolInputCommands.forward = false;
-	
-	if (m_keyArray['S'])
-	{
-		m_toolInputCommands.back = true;
-	}
-	else m_toolInputCommands.back = false;
-	if (m_keyArray['A'])
-	{
-		m_toolInputCommands.left = true;
-	}
-	else m_toolInputCommands.left = false;
 
-	if (m_keyArray['D'])
+	void ToolMain::OnWindowStatusChanged(bool IsWindowOpen)
 	{
-		m_toolInputCommands.right = true;
+		//set to true to prevent unwanted object picking when dialog is open
+		WindowOpen = IsWindowOpen; 
 	}
-	else m_toolInputCommands.right = false;
-	//rotation
-	if (m_keyArray['E'])
-	{
-		m_toolInputCommands.rotRight = true;
-	}
-	else m_toolInputCommands.rotRight = false;
-	if (m_keyArray['Q'])
-	{
-		m_toolInputCommands.rotLeft = true;
-	}
-	else m_toolInputCommands.rotLeft = false;
 
-	//WASD
-}
+	Game& ToolMain::GetGame()
+	{
+		return m_d3dRenderer;
+	}
+
+	void ToolMain::Undo()
+	{
+		if(m_commandManager)
+			{
+				m_commandManager->Undo();
+
+				//m_d3dRenderer.BuildDisplayList(&m_DisplayGraph);
+			}
+	}
+
+	void ToolMain::Redo()
+	{
+		if (m_commandManager)
+		{
+			m_commandManager->Redo();
+
+			//m_d3dRenderer.BuildDisplayList(&m_sceneGraph);
+		}
+	}
+

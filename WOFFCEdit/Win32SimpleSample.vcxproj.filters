@@ -60,6 +60,13 @@
       <Filter>MFC</Filter>
     </ClCompile>
     <ClCompile Include="Camera.cpp" />
+    <ClCompile Include="Command.cpp" />
+    <ClCompile Include="CommandManager.cpp" />
+    <ClCompile Include="CommandInterface.cpp" />
+    <ClCompile Include="TransformDialogue.cpp">
+      <Filter>MFC</Filter>
+    </ClCompile>
+    <ClCompile Include="MoveObjectCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -110,6 +117,13 @@
       <Filter>MFC</Filter>
     </ClInclude>
     <ClInclude Include="Camera.h" />
+    <ClInclude Include="Command.h" />
+    <ClInclude Include="CommandManager.h" />
+    <ClInclude Include="CommandInterface.h" />
+    <ClInclude Include="TransformDialogue.h">
+      <Filter>MFC</Filter>
+    </ClInclude>
+    <ClInclude Include="MoveObjectCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

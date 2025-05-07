@@ -7,6 +7,7 @@ BEGIN_MESSAGE_MAP(MFCMain, CWinApp)
 	ON_COMMAND(ID_FILE_SAVETERRAIN, &MFCMain::MenuFileSaveTerrain)
 	ON_COMMAND(ID_EDIT_SELECT, &MFCMain::MenuEditSelect)
 	ON_COMMAND(ID_BUTTON40001,	&MFCMain::ToolBarButton1)
+	ON_COMMAND(ID_EDIT_TRANSFORM, &MFCMain::MenuEditTransform)  //added for transform modifaction
 	ON_UPDATE_COMMAND_UI(ID_INDICATOR_TOOL, &CMyFrame::OnUpdatePage)
 END_MESSAGE_MAP()
 
@@ -31,6 +32,11 @@ BOOL MFCMain::InitInstance()
 	m_frame->UpdateWindow();
 
 
+	//default open to false for start as not opened using button yet
+	WindowOpen = false;
+
+	m_commandManager = new CommandManager();
+
 	//get the rect from the MFC window so we can get its dimensions
 	m_toolHandle = m_frame->m_DirXView.GetSafeHwnd();				//handle of directX child window
 	m_frame->m_DirXView.GetClientRect(&WindowRECT);
@@ -38,7 +44,7 @@ BOOL MFCMain::InitInstance()
 	m_height	= WindowRECT.Height();
 
 	m_ToolSystem.onActionInitialise(m_toolHandle, m_width, m_height);
-
+	m_ToolSystem.SetCommandManager(m_commandManager);
 	return TRUE;
 }
 
@@ -81,6 +87,14 @@ int MFCMain::Run()
 	return (int)msg.wParam;
 }
 
+//set window open to false to allow for object picking again
+void MFCMain::OnDialogueBoxDestroyed() 
+{
+	WindowOpen = false;
+	m_ToolSystem.OnWindowStatusChanged(WindowOpen);
+}
+
+
 void MFCMain::MenuFileQuit()
 {
 	//will post message to the message thread that will exit the application normally
@@ -101,12 +115,43 @@ void MFCMain::MenuEditSelect()
 	m_ToolSelectDialogue.Create(IDD_DIALOG1);	//Start up modeless
 	m_ToolSelectDialogue.ShowWindow(SW_SHOW);	//show modeless
 	m_ToolSelectDialogue.SetObjectData(&m_ToolSystem.m_sceneGraph, &m_ToolSystem.m_selectedObject);
+
+	OnDialogueBoxCreated();
+}
+
+void MFCMain::MenuEditTransform()
+{
+	//with multiselect would need a check here but for this might be ok
+	//may need another check 
+
+	int ID = m_ToolSystem.m_selectedObject; 
+
+	m_ToolTransformDialogue.SetCommandManager(m_commandManager);
+
+	//pass the id to the transform dialogue
+	m_ToolTransformDialogue.Create(IDD_TRANSFORM_DIALOG);	//Start up modeless
+	m_ToolTransformDialogue.SetDisplayGraph(m_ToolSystem.GetDisplayList());
+	m_ToolTransformDialogue.SetMain(this);
+	m_ToolTransformDialogue.SetGame(&m_ToolSystem.GetGame());
+	m_ToolTransformDialogue.SetSelection(ID);
+	//TODO: set command manger here when done
+	m_ToolTransformDialogue.ShowWindow(SW_SHOW);	//show modeless
+
+	m_ToolTransformDialogue.InitialiseWithSelection(); //TODO: complete definition of update from selected objects(funciton called in this function)
+	OnDialogueBoxCreated();
+
 }
 
 void MFCMain::ToolBarButton1()
 {
 	
 	m_ToolSystem.onActionSave();
+}
+
+void MFCMain::OnDialogueBoxCreated()
+{
+	WindowOpen = true;
+	m_ToolSystem.OnWindowStatusChanged(WindowOpen);
 }
 
 
@@ -118,3 +163,5 @@ MFCMain::MFCMain()
 MFCMain::~MFCMain()
 {
 }
+
+

@@ -12,6 +12,8 @@
 #include "ChunkObject.h"
 #include "InputCommands.h"
 #include <vector>
+#include "Camera.h"
+
 
 
 // A basic game implementation that creates a D3D11 device and
@@ -19,6 +21,12 @@
 class Game : public DX::IDeviceNotify
 {
 public:
+
+	//chaned to public to be get 
+	std::vector<DisplayObject>			m_displayList;
+
+	InputCommands						m_InputCommands;
+
 
 	Game();
 	~Game();
@@ -51,6 +59,20 @@ public:
 	void SaveDisplayChunk(ChunkObject *SceneChunk);	//saves geometry et al
 	void ClearDisplayList();
 
+	//object selection:
+	int MousePicking();
+	void SetSelectedID(int id);
+
+	//functions for moving objects with mfc buttons
+	void AddPositionX();
+	void MinusPositionX();
+	void AddPositionY();
+	void MinusPositionY();
+	void AddPositionZ();
+	void MinusPositionZ();
+	
+
+
 #ifdef DXTK_AUDIO
 	void NewAudioDevice();
 #endif
@@ -65,20 +87,16 @@ private:
 	void XM_CALLCONV DrawGrid(DirectX::FXMVECTOR xAxis, DirectX::FXMVECTOR yAxis, DirectX::FXMVECTOR origin, size_t xdivs, size_t ydivs, DirectX::GXMVECTOR color);
 
 	//tool specific
-	std::vector<DisplayObject>			m_displayList;
+	
 	DisplayChunk						m_displayChunk;
-	InputCommands						m_InputCommands;
 
-	//functionality
-	float								m_movespeed;
+	
+	//define camera object
+	std::shared_ptr<Camera> m_camera;
 
-	//camera
-	DirectX::SimpleMath::Vector3		m_camPosition;
-	DirectX::SimpleMath::Vector3		m_camOrientation;
-	DirectX::SimpleMath::Vector3		m_camLookAt;
-	DirectX::SimpleMath::Vector3		m_camLookDirection;
-	DirectX::SimpleMath::Vector3		m_camRight;
-	float m_camRotRate;
+	//mouse varaibles
+	DirectX::Mouse::State m_mouseState;
+	Vector3 m_mousePrevious;	
 
 	//control variables
 	bool m_grid;							//grid rendering on / off
@@ -125,6 +143,16 @@ private:
     DirectX::SimpleMath::Matrix                                             m_world;
     DirectX::SimpleMath::Matrix                                             m_view;
     DirectX::SimpleMath::Matrix                                             m_projection;
+
+
+	//object picking variables
+	RECT m_ScreenDimensions;
+	int selectedID;
+
+	//used to track previous selected object to reset colour
+	int previouslySelectedID;
+
+
 
 
 };
