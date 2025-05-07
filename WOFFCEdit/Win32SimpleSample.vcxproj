@@ -176,6 +176,7 @@
     <ClCompile Include="DisplayObject.cpp" />
     <ClCompile Include="Game.cpp" />
     <ClCompile Include="Main.cpp" />
+    <ClCompile Include="ManipulateTerrainCommand.cpp" />
     <ClCompile Include="MFCFrame.cpp" />
     <ClCompile Include="MFCRenderFrame.cpp" />
     <ClCompile Include="MoveObjectCommand.cpp" />
@@ -198,6 +199,7 @@
     <ClInclude Include="DisplayObject.h" />
     <ClInclude Include="Game.h" />
     <ClInclude Include="InputCommands.h" />
+    <ClInclude Include="ManipulateTerrainCommand.h" />
     <ClInclude Include="MFCFrame.h" />
     <ClInclude Include="MFCRenderFrame.h" />
     <ClInclude Include="MoveObjectCommand.h" />

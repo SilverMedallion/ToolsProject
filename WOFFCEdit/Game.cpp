@@ -125,7 +125,7 @@ void Game::Update(DX::StepTimer const& timer)
 	m_displayChunk.m_terrainEffect->SetWorld(Matrix::Identity);
 	
 
-
+   
     
 
 #ifdef DXTK_AUDIO

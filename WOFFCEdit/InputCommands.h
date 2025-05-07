@@ -19,4 +19,6 @@ struct InputCommands
 	bool mouse_left;
 	bool mouse_right;
 
+	//terain
+	bool t_pressed;
 };

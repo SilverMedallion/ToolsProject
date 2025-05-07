@@ -379,6 +379,13 @@ void ToolMain::UpdateInput(MSG* msg)
 		}
 		else m_toolInputCommands.right = false;
 
+		//terrain key
+		if (m_keyArray['T'])
+		{
+			m_toolInputCommands.t_pressed = true;
+		}
+		else m_toolInputCommands.t_pressed = false;
+
 
 		//cam rotation
 		if (m_keyArray['E'])

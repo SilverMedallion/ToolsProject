@@ -67,6 +67,7 @@
       <Filter>MFC</Filter>
     </ClCompile>
     <ClCompile Include="MoveObjectCommand.cpp" />
+    <ClCompile Include="ManipulateTerrainCommand.cpp" />
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="DeviceResources.h">
@@ -124,6 +125,7 @@
       <Filter>MFC</Filter>
     </ClInclude>
     <ClInclude Include="MoveObjectCommand.h" />
+    <ClInclude Include="ManipulateTerrainCommand.h" />
   </ItemGroup>
   <ItemGroup>
     <None Include="packages.config" />

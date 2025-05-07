@@ -13,6 +13,7 @@
 #include "InputCommands.h"
 #include <vector>
 #include "Camera.h"
+#include "ManipulateTerrainCommand.h"
 
 
 
@@ -89,6 +90,17 @@ private:
 	//tool specific
 	
 	DisplayChunk						m_displayChunk;
+
+	//terrain
+	DirectX::SimpleMath::Vector3 RaycastToGroundPlan();
+
+	//terrain pointer to trakc the current terrrain edit
+	std::unique_ptr<ManipulateTerrainCommand> m_activTerrainCommand;
+
+	//terrain circle
+	bool m_drawCircle = true;
+	DirectX::SimpleMath::Vector3 m_circlePosition = DirectX::SimpleMath::Vector3::Zero;
+	float m_circleRadius = 20.0f;
 
 	
 	//define camera object
